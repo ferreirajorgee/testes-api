@@ -1,0 +1,342 @@
+{
+  "info": {
+    "_postman_id": "27560552-ef20-4fc4-a90f-4cb3e2c81eaf",
+    "name": "Catálogo de Livros",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55989780",
+    "_collection_link": "https://go.postman.co/collection/55989780-27560552-ef20-4fc4-a90f-4cb3e2c81eaf?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Login com o usuário administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const tokenGerado = pm.response.json().token\r",
+                  "pm.environment.set(\"token\", tokenGerado);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin@biblioteca.com\",\r\n  \"password\": \"admin123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}login",
+              "host": [
+                "{{baseUrl}}login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Adicionar livro",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if(pm.response.code === 201){\r",
+              "pm.test(\"Status code é 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "}\r",
+              "\r",
+              "if(pm.response.code === 201){\r",
+              "pm.test(\"Deverá validar a mensagem de sucesso\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"Livro criado com sucesso.\");\r",
+              "});\r",
+              "\r",
+              "}\r",
+              "\r",
+              "if(pm.response.code === 400){\r",
+              "    pm.test(\"Deve validar se já existe um livro com o mesmo nome\", () => {\r",
+              "        const response = pm.response.json();\r",
+              "        pm.expect(response.message).to.contain(\"Já existe um livro com este título e autor.\");\r",
+              "    })\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "{{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"O Senhor dos Anéis - A Sociedade do Anel\",\n  \"author\": \"J.R.R. Tolkien\",\n  \"description\": \"A história segue o hobbit Frodo Bolseiro em uma missão épica para destruir o Anel na Montanha da Perdição.\",\n  \"category\": \"Fantasia\",\n  \"isbn\": \"978-85-260-1320-6\",\n  \"editor\": \"Editora HaperCollins Brasil\",\n  \"language\": \"Português\",\n  \"publication_year\": 1890,\n  \"pages\": 312,\n  \"format\": \"Físico\",\n  \"total_copies\": 4,\n  \"available_copies\": 4\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}books",
+          "host": [
+            "{{baseUrl}}books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Remover livro",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if(pm.response.code === 200){\r",
+              "pm.test(\"Status code é 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "}\r",
+              "\r",
+              "if(pm.response.code === 200){\r",
+              "pm.test(\"Deve validar mensagem de sucesso\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"Livro deletado com sucesso.\");\r",
+              "});\r",
+              "\r",
+              "}\r",
+              "\r",
+              "if(pm.response.code === 404){\r",
+              "    pm.test(\"Retornou mensagem de livro não encontrado\", () => {\r",
+              "        const response = pm.response.json();\r",
+              "        pm.expect(response.message).to.eql(\"Livro não encontrado.\");\r",
+              "    })\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "{{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}books/28",
+          "host": [
+            "{{baseUrl}}books"
+          ],
+          "path": [
+            "28"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar livros com paginação",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code é 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Deve validar se o corpo da resposta contém a chave 'books'\", function () {\r",
+              "    pm.expect(pm.response.json()).to.have.property('books');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Deve validar o limite de registros por página\", function() {\r",
+              "    pm.expect(pm.response.json().pagination.limit).to.equal(5);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}books?available=true&limit=5&offset=0&orderBy=title&order=ASC",
+          "host": [
+            "{{baseUrl}}books"
+          ],
+          "query": [
+            {
+              "key": "available",
+              "value": "true"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "orderBy",
+              "value": "title"
+            },
+            {
+              "key": "order",
+              "value": "ASC"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Atualizar livro",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if(pm.response.code === 200){\r",
+              "pm.test(\"Status code é 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "}\r",
+              "\r",
+              "if(pm.response.code === 200){\r",
+              "pm.test(\"Deve validar a mensagem de sucesso\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"Livro atualizado com sucesso.\");\r",
+              "});\r",
+              "\r",
+              "}\r",
+              "\r",
+              "if(pm.response.code === 404){\r",
+              "    pm.test(\"Deve validar mensagem de livro não encontrado\", () => {\r",
+              "        const response = pm.response.json();\r",
+              "        pm.expect(response.message).to.eql(\"Livro não encontrado.\");\r",
+              "    })\r",
+              "}\r",
+              "\r",
+              "if(pm.response.code === 400){\r",
+              "    pm.test(\"Deve validar mensagem de campo obrigatório não preenchido\", () => {\r",
+              "        const response = pm.response.json();\r",
+              "        pm.expect(response.message).to.contain(\"is required\");\r",
+              "    })\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "accept",
+            "value": "*/*"
+          },
+          {
+            "key": "Authorization",
+            "value": "{{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"O Senhor dos Anéis: A Sociedade do Anel - Parte I\",\n  \"author\": \"Autor Atualizado\",\n  \"category\": \"Fantasia Épica\",\n  \"language\": \"Português\",\n  \"publication_year\": 2000,\n  \"pages\": 300,\n  \"format\": \"Físico\",\n  \"total_copies\": 10,\n  \"available_copies\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}books/99",
+          "host": [
+            "{{baseUrl}}books"
+          ],
+          "path": [
+            "99"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
